@@ -1,0 +1,2 @@
+# GophKeeperer
+GophKeeper is a system built on a client-server architecture, designed to offer secure and dependable storage of logins, passwords, binary data, and various confidential details. This system was developed during the "Advanced Go Developer" course by Yandex Practicum.
