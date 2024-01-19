@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -15,11 +15,11 @@ import (
 // deleteNotesCmd represents the deleteNotes command
 var deleteNotesCmd = &cobra.Command{
 	Use:     "delete-note",
-	Short:   "Delete user's notes from goph-keeper storage",
-	Example: "goph-keeper delete-note --user <user-name> --title <note title>",
+	Short:   "Delete user's notes from GophKeeper storage",
+	Example: "GophKeeper delete-note --user <user-name> --title <note title>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

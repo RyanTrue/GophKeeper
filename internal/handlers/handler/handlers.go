@@ -2,9 +2,10 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"go.uber.org/zap"
 	"io"
 	"log"
@@ -15,12 +16,12 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 type handler struct {
-	db      storage
+	db      internal.Storage
 	log     *zap.SugaredLogger
 	cookies map[string]string
 }
 
-func New(db storage, log *zap.SugaredLogger) *handler {
+func New(db internal.Storage, log *zap.SugaredLogger) *handler {
 	return &handler{
 		db:      db,
 		log:     log,
@@ -28,11 +29,13 @@ func New(db storage, log *zap.SugaredLogger) *handler {
 	}
 }
 
-// Login is a method for login in goph-keeper system.
+// Login is a method for login in GophKeeper system.
 // The body of the HTTP request must contain `login` and `password`.
 // For example: curl -X POST http://127.0.0.1:8080/auth/login `{"login": "user_login", "password": "user_password"}`
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body and get user's login/password
 	user, err := parseInputUser(r.Body)
 	if err != nil {
@@ -40,7 +43,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// check password for user
-	if err = h.db.Login(user.Login, user.Password); err != nil {
+	if err = h.db.Login(ctx, user.Login, user.Password); err != nil {
 		message, status := parseUserError(user.Login, err)
 		http.Error(w, message, status)
 		return
@@ -63,20 +66,21 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 	h.log.Infof("user %q was successfully logined", user.Login)
 }
 
-// Register is a method for register user in goph-keeper system with provided credentials.
+// Register is a method for register user in GophKeeper system with provided credentials.
 // The body of the HTTP request must contain `login` and `password`.
 // For example: curl -X POST http://127.0.0.1:8080/auth/register --data `{"login": "user_login", "password": "user_password"}`
 func (h *handler) Register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
+	ctx := context.Background()
 	// parse body and get user's login/password
 	user, err := parseInputUser(r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// register user in goph-keeper system
-	if err = h.db.Register(user.Login, user.Password); err != nil {
+	// register user in GophKeeper system
+	if err = h.db.Register(ctx, user.Login, user.Password); err != nil {
 		message, status := parseUserError(user.Login, err)
 		http.Error(w, message, status)
 		return
@@ -105,6 +109,8 @@ func (h *handler) Register(w http.ResponseWriter, r *http.Request) {
 // For example: curl -X POST http://127.0.0.1:8080/get/credentials --data `{"user_name": "some_name"}`
 func (h *handler) GetUserCredentials(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -118,8 +124,8 @@ func (h *handler) GetUserCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user credentials from goph-keeper storage
-	creds, err := h.db.GetCredentials(userCredentialsRequest)
+	// get user credentials from GophKeeper storage
+	creds, err := h.db.GetCredentials(ctx, userCredentialsRequest)
 	if err != nil {
 		message, status := parseUserError(userCredentialsRequest.UserName, err)
 		http.Error(w, message, status)
@@ -145,6 +151,8 @@ func (h *handler) GetUserCredentials(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/save/credentials --data `{"user_name": "some_name", "login": "some_login", "password": "strong_password", "metadata": "some optional data"}`
 func (h *handler) SaveUserCredentials(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
@@ -161,8 +169,8 @@ func (h *handler) SaveUserCredentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// save credentials for user in goph-keeper storage
-	if err := h.db.SaveCredentials(requestCredentials); err != nil {
+	// save credentials for user in GophKeeper storage
+	if err := h.db.SaveCredentials(ctx, requestCredentials); err != nil {
 		message, status := parseUserError(requestCredentials.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -182,6 +190,8 @@ func (h *handler) SaveUserCredentials(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/delete/credentials --data `{"user_name": "some_name", "login": "some_login"}`
 func (h *handler) DeleteUserCredentials(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -195,8 +205,8 @@ func (h *handler) DeleteUserCredentials(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// delete credentials from goph-keeper storage
-	if err := h.db.DeleteCredentials(userCredentialsRequest); err != nil {
+	// delete credentials from GophKeeper storage
+	if err := h.db.DeleteCredentials(ctx, userCredentialsRequest); err != nil {
 		message, status := parseUserError(userCredentialsRequest.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -220,6 +230,8 @@ func (h *handler) DeleteUserCredentials(w http.ResponseWriter, r *http.Request) 
 // curl -X POST http://127.0.0.1:8080/update/credentials --data `{"user_name": "some_name", "login": "some_login", "password": "new_password", "metadata": "some optional data"}`
 func (h *handler) UpdateUserCredentials(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
@@ -236,8 +248,8 @@ func (h *handler) UpdateUserCredentials(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// update credentials for user in goph-keeper storage
-	if err := h.db.UpdateCredentials(requestCredentials); err != nil {
+	// update credentials for user in GophKeeper storage
+	if err := h.db.UpdateCredentials(ctx, requestCredentials); err != nil {
 		message, status := parseUserError(requestCredentials.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -257,6 +269,8 @@ func (h *handler) UpdateUserCredentials(w http.ResponseWriter, r *http.Request) 
 // curl -X POST http://127.0.0.1:8080/save/note --data `{"user_name": "some_name", "title": "note_title", "content": "shopping list", "metadata": "some optional data"}`
 func (h *handler) SaveUserNote(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
@@ -273,8 +287,8 @@ func (h *handler) SaveUserNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// save note for user in goph-keeper storage
-	if err := h.db.SaveNote(requestNote); err != nil {
+	// save note for user in GophKeeper storage
+	if err := h.db.SaveNote(ctx, requestNote); err != nil {
 		message, status := parseUserError(requestNote.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -293,6 +307,8 @@ func (h *handler) SaveUserNote(w http.ResponseWriter, r *http.Request) {
 // For example: curl -X POST http://127.0.0.1:8080/get/note --data `{"user_name": "some_name", "title": "some_title"}`
 func (h *handler) GetUserNote(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -306,8 +322,8 @@ func (h *handler) GetUserNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user note from goph-keeper storage
-	creds, err := h.db.GetNotes(userNotesRequest)
+	// get user note from GophKeeper storage
+	creds, err := h.db.GetNotes(ctx, userNotesRequest)
 	if err != nil {
 		message, status := parseUserError(userNotesRequest.UserName, err)
 		http.Error(w, message, status)
@@ -333,6 +349,8 @@ func (h *handler) GetUserNote(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/delete/note --data `{"user_name": "some_name", "title": "some_title"}`
 func (h *handler) DeleteUserNotes(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -345,8 +363,8 @@ func (h *handler) DeleteUserNotes(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// delete notes from goph-keeper storage
-	if err = h.db.DeleteNotes(userNotesRequest); err != nil {
+	// delete notes from GophKeeper storage
+	if err = h.db.DeleteNotes(ctx, userNotesRequest); err != nil {
 		message, status := parseUserError(userNotesRequest.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -371,6 +389,8 @@ func (h *handler) DeleteUserNotes(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/update/note --data `{"user_name": "some_name", "title": "some_title", "content": "new shopping list", "metadata": "some optional data"}`
 func (h *handler) UpdateUserNote(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
@@ -387,8 +407,8 @@ func (h *handler) UpdateUserNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// update note for user in goph-keeper storage
-	if err := h.db.UpdateNote(requestNote); err != nil {
+	// update note for user in GophKeeper storage
+	if err := h.db.UpdateNote(ctx, requestNote); err != nil {
 		message, status := parseUserError(requestNote.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -408,6 +428,8 @@ func (h *handler) UpdateUserNote(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/save/card --data `{"user_name": "some_name", "bank_name": "alpha", "number":"1111222233334444", "cv": "123", "password": "3452", "metadata": "the card with a lot of money"}`
 func (h *handler) SaveCard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(r.Body); err != nil {
@@ -421,8 +443,8 @@ func (h *handler) SaveCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// save card in goph-keeper storage
-	if err := h.db.SaveCard(requestCard); err != nil {
+	// save card in GophKeeper storage
+	if err := h.db.SaveCard(ctx, requestCard); err != nil {
 		message, status := parseUserError(requestCard.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -441,6 +463,8 @@ func (h *handler) SaveCard(w http.ResponseWriter, r *http.Request) {
 // For example: curl -X POST http://127.0.0.1:8080/get/card --data `{"user_name": "some_name", "bank_name":"tinkofff" ,"number": "1111222233334444"}`
 func (h *handler) GetCard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -454,8 +478,8 @@ func (h *handler) GetCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get user cards from goph-keeper storage
-	cards, err := h.db.GetCard(cardRequest)
+	// get user cards from GophKeeper storage
+	cards, err := h.db.GetCard(ctx, cardRequest)
 	if err != nil {
 		message, status := parseUserError(cardRequest.UserName, err)
 		http.Error(w, message, status)
@@ -481,6 +505,8 @@ func (h *handler) GetCard(w http.ResponseWriter, r *http.Request) {
 // curl -X POST http://127.0.0.1:8080/delete/card --data `{"user_name": "some_name", "bank_name": "tinkoff", "number": "1111222233334444"}`
 func (h *handler) DeleteCard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
+
+	ctx := context.Background()
 	// parse body to get user's name
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -493,8 +519,8 @@ func (h *handler) DeleteCard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// delete card from goph-keeper storage
-	if err = h.db.DeleteCards(cardRequest); err != nil {
+	// delete card from GophKeeper storage
+	if err = h.db.DeleteCards(ctx, cardRequest); err != nil {
 		message, status := parseUserError(cardRequest.UserName, err)
 		http.Error(w, message, status)
 		return
@@ -552,21 +578,4 @@ func (h *handler) BasicAuth(next http.Handler) http.Handler {
 		r.Body = io.NopCloser(bytes.NewBuffer(buf.Bytes()))
 		next.ServeHTTP(w, r)
 	})
-}
-
-//go:generate mockery --disable-version-string --inpackage --filename storage_mock.go --name storage
-type storage interface {
-	SaveCredentials(credentialsRequest internal.Credentials) error
-	GetCredentials(credentialsRequest internal.Credentials) ([]internal.Credentials, error)
-	DeleteCredentials(credentialsRequest internal.Credentials) error
-	UpdateCredentials(credentials internal.Credentials) error
-	SaveNote(note internal.Note) error
-	GetNotes(noteRequest internal.Note) ([]internal.Note, error)
-	DeleteNotes(noteRequest internal.Note) error
-	UpdateNote(note internal.Note) error
-	SaveCard(card internal.Card) error
-	GetCard(cardRequest internal.Card) ([]internal.Card, error)
-	DeleteCards(cardRequest internal.Card) error
-	Register(login string, password string) error
-	Login(login string, password string) error
 }

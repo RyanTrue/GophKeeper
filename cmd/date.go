@@ -12,7 +12,7 @@ var buildDate = ""
 var dateCmd = &cobra.Command{
 	Use:     "build-date",
 	Short:   "Show build date",
-	Example: "goph-keeper build-date",
+	Example: "GophKeeper build-date",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Printf("build date: %s\n", buildDate)
 	},

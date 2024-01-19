@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -15,14 +15,14 @@ import (
 // addCredentialsCmd represents the add-credentials command
 var addCredentialsCmd = &cobra.Command{
 	Use:   "add-credentials",
-	Short: "Add a pair of login/password to goph-keeper.",
-	Long: `Add a pair of login/password to goph-keeper database for
+	Short: "Add a pair of login/password to GophKeeper.",
+	Long: `Add a pair of login/password to GophKeeper database for
 long-term storage. Only authorized users can use this command. The password is stored in the database in encrypted form.`,
-	Example: "goph-keeper add-credentials --user <user-name> --login <user-login> --password <password to store> --metadata <some description>",
+	Example: "GophKeeper add-credentials --user <user-name> --login <user-login> --password <password to store> --metadata <some description>",
 
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

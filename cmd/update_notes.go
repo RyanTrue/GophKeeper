@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -16,10 +16,10 @@ import (
 var updateNotesCmd = &cobra.Command{
 	Use:     "update-note",
 	Short:   "Update user notes.",
-	Example: "goph-keeper update-notes --user <user-name> --title <note-title> --content <new-content>",
+	Example: "GophKeeper update-notes --user <user-name> --title <note-title> --content <new-content>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

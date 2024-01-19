@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/RyanTrue/GophKeeper.git/cmd"
+	"github.com/RyanTrue/GophKeeper/cmd"
 )
 
 func main() {

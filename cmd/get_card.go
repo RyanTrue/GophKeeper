@@ -3,31 +3,28 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/cobra"
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/spf13/cobra"
 )
 
 // getCardCmd represents the getCard command
 var getCardCmd = &cobra.Command{
 	Use:     "get-card",
-	Short:   "Get card info from goph-keeper storage",
-	Example: "goph-keeper  get-card --user <user-name> --number <card number>",
+	Short:   "Get card info from GophKeeper storage",
+	Example: "GophKeeper  get-card --user <user-name> --number <card number>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {
-			log.Printf("error while loading envs: %s\n", err)
-			os.Exit(1)
+			log.Fatalf("error while loading envs: %s\n", err)
 		}
 
 		userName, _ := cmd.Flags().GetString("user")
