@@ -1,4 +1,4 @@
-module github.com/RyanTrue/GophKeeper.git
+module github.com/RyanTrue/GophKeeper
 
 go 1.21.6
 

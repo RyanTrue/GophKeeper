@@ -3,7 +3,7 @@
 package handler
 
 import (
-	internal "github.com/RyanTrue/GophKeeper.git/internal"
+	internal "github.com/RyanTrue/GophKeeper/internal"
 	mock "github.com/stretchr/testify/mock"
 )
 

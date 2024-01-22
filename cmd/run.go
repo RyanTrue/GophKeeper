@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
-	"github.com/RyanTrue/GophKeeper.git/internal/database"
-	router2 "github.com/RyanTrue/GophKeeper.git/internal/handlers/router"
+	"github.com/RyanTrue/GophKeeper/internal"
+	"github.com/RyanTrue/GophKeeper/internal/database"
+	router2 "github.com/RyanTrue/GophKeeper/internal/handlers/router"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"

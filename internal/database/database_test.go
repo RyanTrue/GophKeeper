@@ -4,7 +4,7 @@ import (
 	"crypto/aes"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/RyanTrue/GophKeeper.git/internal"
+	"github.com/RyanTrue/GophKeeper/internal"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 	"testing"

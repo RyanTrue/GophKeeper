@@ -1,8 +1,8 @@
 package router
 
 import (
-	"github.com/RyanTrue/GophKeeper.git/internal"
-	"github.com/RyanTrue/GophKeeper.git/internal/handlers/handler"
+	"github.com/RyanTrue/GophKeeper/internal"
+	"github.com/RyanTrue/GophKeeper/internal/handlers/handler"
 	"github.com/go-chi/chi"
 	"go.uber.org/zap"
 )

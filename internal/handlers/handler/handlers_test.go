@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper.git/internal"
-	"github.com/RyanTrue/GophKeeper.git/internal/database"
+	"github.com/RyanTrue/GophKeeper/internal"
+	"github.com/RyanTrue/GophKeeper/internal/database"
 	"github.com/go-chi/chi"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"

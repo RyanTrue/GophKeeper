@@ -9,4 +9,4 @@ install:
 
 stop:
 	docker-compose down
-	docker image rm goph-keeper-server --force & docker image rm goph-keeper-migrate --force & docker image rm goph-keeper-server --force
+	docker image rm GophKeeper-server --force & docker image rm GophKeeper-migrate --force & docker image rm GophKeeper-server --force
