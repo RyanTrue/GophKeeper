@@ -19,13 +19,13 @@ import (
 // addNotesCmd represents the add-notes command
 var addNotesCmd = &cobra.Command{
 	Use:   "add-note",
-	Short: "Add user's note to goph-keeper storage.",
-	Long: `Add user's note to goph-keeper database for long-term storage.
+	Short: "Add user's note to GophKeeper storage.",
+	Long: `Add user's note to GophKeeper database for long-term storage.
 Only authorized users can use this command. The note content is stored in the database in encrypted form.`,
-	Example: "goph-keeper add-note --user <user-name> --title <note title> --content <note content> --metadata <note metadata>",
+	Example: "GophKeeper add-note --user <user-name> --title <note title> --content <note content> --metadata <note metadata>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

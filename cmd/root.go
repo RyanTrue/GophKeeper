@@ -12,7 +12,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "goph-keeper",
+	Use:     "GophKeeper",
 	Version: version,
 	Short:   "GophKeeper is a client-server system that allows the user to safely and securely store logins, passwords, binary data and other sensitive information.",
 }

@@ -7,29 +7,26 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/cobra"
 	"log"
 	"net/http"
-	"os"
-
-	"github.com/spf13/cobra"
 )
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Login to the goph-keeper system",
-	Long: `Login to the goph-keeper system with specified login and password. 
+	Short: "Login to the GophKeeper system",
+	Long: `Login to the GophKeeper system with specified login and password. 
 Only registered users can run this command`,
-	Example: "goph-keeper login --login <user-system-login> --password <user-system-password>`",
+	Example: "GophKeeper login --login <user-system-login> --password <user-system-password>`",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {
-			log.Printf("error while loading envs: %s\n", err)
-			os.Exit(1)
+			log.Fatalf("error while loading envs: %s\n", err)
 		}
 
 		login, _ := cmd.Flags().GetString("login")
@@ -41,8 +38,7 @@ Only registered users can run this command`,
 
 		body, err := json.Marshal(userCreds)
 		if err != nil {
-			log.Printf(err.Error())
-			os.Exit(1)
+			log.Fatalf(err.Error())
 		}
 
 		resp, err := resty.New().R().
@@ -57,7 +53,7 @@ Only registered users can run this command`,
 			fmt.Println(resp.String())
 			return
 		}
-		fmt.Printf("user %q was successfully logined in goph-keeper", login)
+		fmt.Printf("user %q was successfully logined in GophKeeper", login)
 	},
 }
 

@@ -15,11 +15,11 @@ import (
 // deleteNotesCmd represents the deleteNotes command
 var deleteNotesCmd = &cobra.Command{
 	Use:     "delete-note",
-	Short:   "Delete user's notes from goph-keeper storage",
-	Example: "goph-keeper delete-note --user <user-name> --title <note title>",
+	Short:   "Delete user's notes from GophKeeper storage",
+	Example: "GophKeeper delete-note --user <user-name> --title <note title>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

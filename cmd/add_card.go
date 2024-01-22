@@ -16,10 +16,10 @@ import (
 // addCardCmd represents the addCard command
 var addCardCmd = &cobra.Command{
 	Use:   "add-card",
-	Short: "Add bank card info to goph-keeper.",
-	Long: `Add bank card info (bank name, card number, cv, password and metadata) to goph-keeper database for
+	Short: "Add bank card info to GophKeeper",
+	Long: `Add bank card info (bank name, card number, cv, password and metadata) to GophKeeper database for
 long-term storage. Only authorized users can use this command. Password and cv are stored in the database in the encrypted form.`,
-	Example: "goph-keeper  add-card --user user-name --bank alpha --number 1111222233334444 --cv 123 --password 1243",
+	Example: "GophKeeper  add-card --user user-name --bank alpha --number 1111222233334444 --cv 123 --password 1243",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
 			log.Fatalf("error occured while loading envs from file: %s", err)

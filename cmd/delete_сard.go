@@ -16,11 +16,11 @@ import (
 // deleteCardCmd represents the deleteCard command
 var deleteCardCmd = &cobra.Command{
 	Use:     "delete-card",
-	Short:   "Delete card info from goph-keeper storage",
-	Example: "goph-keeper  delete-card --user user-name --bank alpha",
+	Short:   "Delete card info from GophKeeper storage",
+	Example: "GophKeeper  delete-card --user user-name --bank alpha",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {

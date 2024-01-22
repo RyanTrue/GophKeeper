@@ -16,10 +16,10 @@ import (
 var updateNotesCmd = &cobra.Command{
 	Use:     "update-note",
 	Short:   "Update user notes.",
-	Example: "goph-keeper update-notes --user <user-name> --title <note-title> --content <new-content>",
+	Example: "GophKeeper update-notes --user <user-name> --title <note-title> --content <new-content>",
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := godotenv.Load(".env"); err != nil {
-			log.Fatalf("Some error occured. Err: %s", err)
+			log.Fatalf("error while getting envs: %s", err)
 		}
 		var cfg internal.Params
 		if err := envconfig.Process("", &cfg); err != nil {
