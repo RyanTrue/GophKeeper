@@ -1,23 +1,27 @@
-package memory
+package postgres
 
 import "github.com/RyanTrue/GophKeeper/internal/repository"
 
-type Factory struct{}
+type Factory struct {
+	db *Postgres
+}
 
 var _ repository.Factory = (*Factory)(nil)
 
-func NewFactory() repository.Factory {
-	return &Factory{}
+func NewFactory(db *Postgres) repository.Factory {
+	return &Factory{
+		db: db,
+	}
 }
 
 func (f *Factory) CreateUsersRepository() repository.Users {
-	return NewUsersRepository()
+	return NewUsersRepository(f.db)
 }
 
 func (f *Factory) CreateSettingsRepository() repository.Settings {
-	return NewSettingsRepository()
+	return NewSettingsRepository(f.db)
 }
 
 func (f *Factory) CreateCredsSecretsRepository() repository.CredsSecrets {
-	return NewCredsSecretsRepository()
+	return NewCredsSecretsRepository(f.db)
 }

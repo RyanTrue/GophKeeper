@@ -1,6 +1,7 @@
 package repository
 
 type Factory interface {
-	CreateUserRepository() Users
+	CreateUsersRepository() Users
 	CreateSettingsRepository() Settings
+	CreateCredsSecretsRepository() CredsSecrets
 }

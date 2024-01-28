@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/RyanTrue/GophKeeper/internal/config"
 	"github.com/RyanTrue/GophKeeper/internal/repository"
-	"github.com/RyanTrue/GophKeeper/internal/repository/memory"
+	"github.com/RyanTrue/GophKeeper/internal/repository/postgres"
 	"github.com/RyanTrue/GophKeeper/internal/server"
 	servicesPkg "github.com/RyanTrue/GophKeeper/internal/services"
 	"github.com/rs/zerolog"
@@ -25,12 +25,22 @@ func main() {
 	cfg := config.NewConfig("./config")
 	log.Debug().Interface("config", cfg).Send()
 
-	factory := memory.NewFactory()
-	repo := repository.NewRepository(factory)
+	db, err := postgres.NewPostgres(ctx, cfg.ReposConfig.Postgres)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Connecting to the Postgres database")
+	}
 
-	services := servicesPkg.NewServices(repo, cfg.ServerConfig.JWTSecret)
+	factory := postgres.NewFactory(db)
+	repos := repository.NewRepository(factory)
 
-	coreServer := server.NewServer(cfg.ServerConfig.Address, services)
+	services := servicesPkg.NewServices(repos, cfg.ServerConfig.JWTSecret)
+
+	coreServer := server.NewServer(
+		cfg.ServerConfig.Address,
+		services,
+		cfg.ServerConfig.SSLCertPath,
+		cfg.ServerConfig.SSLKeyPath,
+	)
 
 	g, gCtx := errgroup.WithContext(ctx)
 	g.Go(func() error {
@@ -42,7 +52,7 @@ func main() {
 		return coreServer.Shutdown()
 	})
 
-	if err := g.Wait(); err != nil {
+	if err = g.Wait(); err != nil {
 		log.Info().Err(err).Msg("Reason for graceful shutdown")
 	}
 

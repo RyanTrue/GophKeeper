@@ -3,12 +3,19 @@ package client
 import (
 	"context"
 	pb "github.com/RyanTrue/GophKeeper/api/proto"
+	"github.com/RyanTrue/GophKeeper/internal/interceptor"
+	"github.com/RyanTrue/GophKeeper/internal/repository"
 	"github.com/RyanTrue/GophKeeper/pkg/cert"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 )
 
-func NewUserClient(ctx context.Context, address string, sslCertPath, sslKeyPath string) pb.UserClient {
+func NewCredsClient(
+	ctx context.Context,
+	address string,
+	settingsRepo repository.Settings,
+	sslCertPath, sslKeyPath string,
+) pb.CredsClient {
 	tlsCredential, err := cert.LoadClientCertificate(sslCertPath, sslKeyPath)
 	if err != nil {
 		log.Fatal().
@@ -18,7 +25,13 @@ func NewUserClient(ctx context.Context, address string, sslCertPath, sslKeyPath 
 			Msg("Loading client TLS cert")
 	}
 
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(tlsCredential))
+	authInterceptor := interceptor.NewUnaryClientAuthInterceptor(settingsRepo)
+
+	conn, err := grpc.Dial(
+		address,
+		grpc.WithTransportCredentials(tlsCredential),
+		grpc.WithUnaryInterceptor(authInterceptor.Handle()),
+	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Connecting to gRPC server")
 	}
@@ -30,5 +43,5 @@ func NewUserClient(ctx context.Context, address string, sslCertPath, sslKeyPath 
 		}
 	}()
 
-	return pb.NewUserClient(conn)
+	return pb.NewCredsClient(conn)
 }

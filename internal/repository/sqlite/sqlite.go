@@ -51,6 +51,10 @@ func (s *SQLite) migrate() error {
 		return err
 	}
 
+	if err := s.createCredsSecretsTable(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -68,11 +72,31 @@ func (s *SQLite) createSettingsTable() error {
 
 func (s *SQLite) createUsersTable() error {
 	query := `CREATE TABLE IF NOT EXISTS users (
-		id         INTEGER PRIMARY KEY AUTOINCREMENT,
-		login      TEXT NOT NULL UNIQUE,
-		password   TEXT NOT NULL,
-		aesSecret  TEXT NOT NULL,
-		privateKey TEXT NOT NULL
+		id          INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		login       TEXT NOT NULL UNIQUE,
+		password    TEXT NOT NULL,
+		aes_secret  TEXT NOT NULL,
+		private_key TEXT NOT NULL
+	)`
+	if _, err := s.Exec(query); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *SQLite) createCredsSecretsTable() error {
+	query := `CREATE TABLE IF NOT EXISTS creds_secrets (
+		id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+		uid		        INTEGER NOT NULL,
+		website         TEXT NOT NULL,
+		login           TEXT NOT NULL,
+		enc_password    TEXT NOT NULL,
+		additional_data TEXT NOT NULL,
+		user_id			INTEGER NOT NULL,
+		UNIQUE (uid),
+		UNIQUE (website, login, user_id),
+		FOREIGN KEY (user_id) REFERENCES users(id)
 	)`
 	if _, err := s.Exec(query); err != nil {
 		return err

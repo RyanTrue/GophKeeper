@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/RyanTrue/GophKeeper/cmd/cli/commands"
+	"github.com/RyanTrue/GophKeeper/internal/cli/commands"
 	servicesPkg "github.com/RyanTrue/GophKeeper/internal/cli/services"
 	"github.com/RyanTrue/GophKeeper/internal/client"
 	"github.com/RyanTrue/GophKeeper/internal/config"
@@ -29,9 +29,9 @@ func main() {
 
 	ctx := context.Background()
 
-	log.Info().Msg(fmt.Sprintf("Build version: %s", buildVersion))
-	log.Info().Msg(fmt.Sprintf("Build date: %s", buildTime))
-	log.Info().Msg(fmt.Sprintf("Build commit: %s\n", buildCommit))
+	fmt.Printf("Build version: %s\n", buildVersion)
+	fmt.Printf("Build date: %s\n", buildTime)
+	fmt.Printf("Build commit: %s\n\n", buildCommit)
 
 	cfg := config.NewConfig("./config")
 
@@ -43,8 +43,26 @@ func main() {
 	factory := sqlite.NewFactory(db)
 	repos := repository.NewRepository(factory)
 
-	userClient := client.NewUserClient(ctx, cfg.ServerConfig.Address)
-	services := servicesPkg.NewServices(userClient, repos, cfg.ServerConfig.JWTSecret, cfg.ServerConfig.MasterPassword)
+	userClient := client.NewUserClient(
+		ctx,
+		cfg.ServerConfig.Address,
+		cfg.ServerConfig.SSLCertPath,
+		cfg.ServerConfig.SSLKeyPath,
+	)
+	credsClient := client.NewCredsClient(
+		ctx,
+		cfg.ServerConfig.Address,
+		repos.Settings,
+		cfg.ServerConfig.SSLCertPath,
+		cfg.ServerConfig.SSLKeyPath,
+	)
+	services := servicesPkg.NewServices(
+		userClient,
+		credsClient,
+		repos,
+		cfg.ServerConfig.JWTSecret,
+		cfg.ServerConfig.MasterPassword,
+	)
 
 	commands.Execute(ctx, &commands.Dependencies{
 		Services: services,

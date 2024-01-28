@@ -15,6 +15,8 @@ type ServerConfig struct {
 	Address        string
 	JWTSecret      string
 	MasterPassword string
+	SSLCertPath    string
+	SSLKeyPath     string
 }
 
 type LoggerConfig struct {
@@ -22,7 +24,8 @@ type LoggerConfig struct {
 }
 
 type ReposConfig struct {
-	SQLite string
+	SQLite   string
+	Postgres string
 }
 
 func NewConfig(configFolder string) *Config {
@@ -31,7 +34,7 @@ func NewConfig(configFolder string) *Config {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal().Err(err).Msg("Reading in config")
+		log.Fatal().Err(err).Str("folder", configFolder).Msg("Reading in config")
 	}
 
 	var config Config
